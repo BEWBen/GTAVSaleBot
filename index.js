@@ -38,7 +38,10 @@ client.on('error', (error) => {
 client.on('message', (msg) => {
     try {
         lib.cleanQueues();
-        const parsed = parser.parse(msg, prefix);
+        const parsed = parser.parse(msg, prefix, {
+            allowBots: false,
+            allowSelf: false,
+        });
         let name, queue_name, queue;
         if (!parsed.success) return;
         switch (parsed.command) {
