@@ -44,7 +44,7 @@ class Queue {
     }
 
     add(name) {
-        this.list.push(name);
+        return this.list.push(name);
     }
 
     shift() {

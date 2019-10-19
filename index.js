@@ -35,6 +35,8 @@ client.on('error', (error) => {
     console.error('Socker error occured:', error);
 });
 
+const renderName = (name, msg) => name === msg.author.username ? 'you' : name;
+
 client.on('message', (msg) => {
     try {
         lib.cleanQueues();
@@ -66,7 +68,7 @@ client.on('message', (msg) => {
                 queue = lib.getQueue(queue_name);
                 if (!queue) return;
                 queue.add(name);
-                msg.reply(`I added \`${name}\` to the bottom of \`${queue.name}\` queue`);
+                msg.reply(`I added \`${renderName(name, msg)}\` to the bottom of \`${queue.name}\` queue`);
                 break;
 
             case 'del': 
@@ -77,7 +79,7 @@ client.on('message', (msg) => {
                 }
                 queue = lib.getQueue(parsed.arguments[0]);
                 name = queue.shift();
-                msg.reply(`I removed \`${name}\` from the top of \`${queue.name}\` queue`);
+                msg.reply(`I removed \`${renderName(name, msg)}\` from the top of \`${queue.name}\` queue`);
                 break;
 
             case 'jump': 
@@ -91,7 +93,7 @@ client.on('message', (msg) => {
                 if (!queue.jump(name)) {
                     msg.reply('Not possible');
                 } else {
-                    msg.reply(`I moved \`${name}\` to the top of \`${queue.name}\` queue`);
+                    msg.reply(`I moved \`${renderName(name, msg)}\` to the top of \`${queue.name}\` queue`);
                 }
                 break;
 
