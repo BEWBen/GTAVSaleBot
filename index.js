@@ -67,8 +67,8 @@ client.on('message', (msg) => {
                 queue_name = parsed.arguments[0];
                 queue = lib.getQueue(queue_name);
                 if (!queue) return;
-                queue.add(name);
-                msg.reply(`I added \`${renderName(name, msg)}\` to the bottom of \`${queue.name}\` queue`);
+                const pos = queue.add(name);
+                msg.reply(`I added \`${renderName(name, msg)}\` to the bottom of \`${queue.name}\` queue, at position \`${pos}\``}`);
                 break;
 
             case 'del': 
