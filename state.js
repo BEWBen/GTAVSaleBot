@@ -1,2 +1,2 @@
-const queues = [];
+let queues = [];
 module.exports = queues;

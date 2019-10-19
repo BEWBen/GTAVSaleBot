@@ -1,9 +1,9 @@
 const arrayMove = require('array-move');
 
-const queues = require('./state');
+let queues = require('./state');
 
 const handleError = (msg, error) => {
-    msg.reply(`A general error occured when processing the message "${msg}"\n${error}`);
+    msg.reply(`A general error occured when processing the message \`${msg}\`\n${error}`);
     return false;
 };
 
@@ -11,14 +11,13 @@ const listQueues = () => {
     if (queues.length === 0) {
         return 'There are no sale queues set up';
     }
-    return queues.map((queue) => queue.list()).join('\n');
+    return '\n' + queues.map((queue) => queue.renderList()).join('\n');
 };
 
 const getQueue = (queue_name) => {
-    queue_name = queue_name.toLowerCase();
-    const queue = queues.find(({ name }) => name == queue_name);
+    let queue = queues.find(({ name }) => name.toLowerCase() == queue_name.toLowerCase());
     if (!queue) {
-        const queue = new Queue(queue_name);
+        queue = new Queue(queue_name);
         queues.push(queue);
     }
     return queue;
@@ -35,9 +34,9 @@ class Queue {
         this.created_at = new Date();
     }
 
-    list() {
+    renderList() {
         const names = this.list.reduce((all, name, idx) => `${all}\n${idx + 1}. ${name}`, '');
-        return `Queue "${this.name}":${names}`;
+        return `\nQueue \`${this.name}\`:\`\`\`${names}\`\`\``;
     }
 
     length() {

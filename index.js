@@ -33,7 +33,7 @@ client.on('ready', () => {
 
 client.on('error', (error) => {
     console.error('Socker error occured:', error);
-})
+});
 
 client.on('message', (msg) => {
     try {
@@ -57,34 +57,46 @@ client.on('message', (msg) => {
 
             case 'add':
             case 'a':
+                if (parsed.arguments.length < 1) {
+                    msg.reply(`Not enough arguments. \`$add\` needs a queue name, and optionally the username.`)
+                    break;
+                }
                 name = (parsed.arguments.length == 2) ? parsed.arguments[1] : msg.author.username;
                 queue_name = parsed.arguments[0];
                 queue = lib.getQueue(queue_name);
                 if (!queue) return;
                 queue.add(name);
-                msg.reply(`I added ${name} to the bottom of ${queue.name} queue`);
+                msg.reply(`I added \`${name}\` to the bottom of \`${queue.name}\` queue`);
                 break;
 
             case 'del': 
             case 'd':
+                if (parsed.arguments.length < 1) {
+                    msg.reply(`Not enough arguments. \`$del\` needs a queue name.`)
+                    break;
+                }
                 queue = lib.getQueue(parsed.arguments[0]);
                 name = queue.shift();
-                msg.reply(`I removed ${name} from the top of ${queue.name} queue`);
+                msg.reply(`I removed \`${name}\` from the top of \`${queue.name}\` queue`);
                 break;
 
             case 'jump': 
             case 'j':
+                if (parsed.arguments.length < 1) {
+                    msg.reply(`Not enough arguments. \`$jump\` needs a queue name, and optionally the username.`)
+                    break;
+                }
                 name = (parsed.arguments.length == 2) ? parsed.arguments[1] : msg.author.username;
                 queue = lib.getQueue(parsed.arguments[0]);
                 if (!queue.jump(name)) {
                     msg.reply('Not possible');
                 } else {
-                    msg.reply(`I moved ${name} to the top of ${queue.name} queue`);
+                    msg.reply(`I moved \`${name}\` to the top of \`${queue.name}\` queue`);
                 }
                 break;
 
             default:
-                msg.reply(`I don't understand "${msg}"`);
+                msg.reply(`I don't understand \`${msg}\``);
                 break;
         };
     } catch (error) {
