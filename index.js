@@ -79,7 +79,7 @@ client.on('message', (msg) => {
                 }
                 queue = lib.getQueue(parsed.arguments[0]);
                 name = queue.shift();
-                msg.reply(`I removed \`${renderName(name, msg)}\` from the top of \`${queue.name}\` queue`);
+                msg.reply(`I removed ${renderName(name, msg)} from the top of \`${queue.name}\` queue`);
                 break;
 
             case 'jump': 
@@ -93,7 +93,7 @@ client.on('message', (msg) => {
                 if (!queue.jump(name)) {
                     msg.reply('Not possible');
                 } else {
-                    msg.reply(`I moved \`${renderName(name, msg)}\` to the top of \`${queue.name}\` queue`);
+                    msg.reply(`I moved ${renderName(name, msg)} to the top of \`${queue.name}\` queue`);
                 }
                 break;
 
