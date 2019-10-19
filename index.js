@@ -85,7 +85,7 @@ client.on('message', (msg) => {
                 break;
         };
     } catch (error) {
-        lib.handleError(msg);
+        lib.handleError(msg, error);
     }
 });
 

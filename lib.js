@@ -2,8 +2,8 @@ const arrayMove = require('array-move');
 
 const queues = require('./state');
 
-const handleError = (msg) => {
-    msg.reply(`A general error occured when processing the message "${msg}"`);
+const handleError = (msg, error) => {
+    msg.reply(`A general error occured when processing the message "${msg}"\n${error}`);
     return false;
 };
 
