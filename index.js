@@ -35,6 +35,7 @@ client.on('message', (msg) => {
     try {
         lib.cleanQueues();
         const parsed = parser.parse(msg, prefix);
+        let name, queue_name, queue;
         if (!parsed.success) return;
         switch (parsed.command) {
             case 'help':
@@ -49,9 +50,9 @@ client.on('message', (msg) => {
 
             case 'add':
             case 'a':
-                const name = (parsed.arguments.length == 2) ? parsed.arguments[1] : msg.author.username;
-                const queue_name = parsed.arguments[0];
-                const queue = lib.getQueue(queue_name);
+                name = (parsed.arguments.length == 2) ? parsed.arguments[1] : msg.author.username;
+                queue_name = parsed.arguments[0];
+                queue = lib.getQueue(queue_name);
                 if (!queue) return;
                 queue.add(name);
                 msg.reply(`I added ${name} to the bottom of ${queue.name} queue`);
@@ -60,13 +61,13 @@ client.on('message', (msg) => {
             case 'del': 
             case 'd':
                 queue = lib.getQueue(parsed.arguments[0]);
-                const name = queue.shift();
+                name = queue.shift();
                 msg.reply(`I removed ${name} from the top of ${queue.name} queue`);
                 break;
 
             case 'jump': 
             case 'j':
-                const name = (parsed.arguments.length == 2) ? parsed.arguments[1] : msg.author.username;
+                name = (parsed.arguments.length == 2) ? parsed.arguments[1] : msg.author.username;
                 queue = lib.getQueue(parsed.arguments[0]);
                 if (!queue.jump(name)) {
                     msg.reply('Not possible');

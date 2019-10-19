@@ -29,12 +29,9 @@ const cleanQueues = () => {
 };
 
 class Queue {
-    list = [];
-    name = null;
-    created_at = null;
-
     constructor(name, creator) {
-        this.state.name = name;
+        this.list = [];
+        this.name = name;
         this.created_at = new Date();
     }
 
