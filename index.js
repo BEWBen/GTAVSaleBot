@@ -35,7 +35,7 @@ client.on('error', (error) => {
     console.error('Socker error occured:', error);
 });
 
-const renderName = (name, msg) => name === msg.author.username ? 'you' : name;
+const renderName = (name, msg) => name === msg.author.username ? 'you' : `\`${name}\``;
 
 client.on('message', (msg) => {
     try {
@@ -68,7 +68,7 @@ client.on('message', (msg) => {
                 queue = lib.getQueue(queue_name);
                 if (!queue) return;
                 const pos = queue.add(name);
-                msg.reply(`I added \`${renderName(name, msg)}\` to the bottom of \`${queue.name}\` queue, at position \`${pos}\``);
+                msg.reply(`I added ${renderName(name, msg)} to the bottom of \`${queue.name}\` queue, at position \`${pos}\``);
                 break;
 
             case 'del': 
