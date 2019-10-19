@@ -31,6 +31,10 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
 
+client.on('error', (error) => {
+    console.error('Socker error occured:', error);
+})
+
 client.on('message', (msg) => {
     try {
         lib.cleanQueues();
