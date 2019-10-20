@@ -7,7 +7,7 @@ const lib = require('./lib');
 const state = require('./state');
 const command_definitions = require('./commands');
 
-const { BOT_TOKEN, GUILD_ID, CHANNEL, PREFIX } = process.env;
+const { BOT_TOKEN, GUILD_ID, PREFIX } = process.env;
 
 // create command handlers and assign them to each invoke phrase
 commands = new Discord.Collection();
@@ -60,7 +60,7 @@ client.on('message', (msg) => {
         if (!parsed.success) return;
 
         // ignore messages not sent via correct channels, if specified
-        if ((CHANNEL && msg.channel.name != CHANNEL) ||
+        if ((msg.channel.type != 'text') ||
             (GUILD_ID && msg.channel.guild.id != GUILD_ID)) {
             msg.reply('This bot is not accessible from here.');
             return;
