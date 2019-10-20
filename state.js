@@ -1,2 +1,3 @@
 let queues = [];
-module.exports = queues;
+const usageStore = {};
+module.exports = {queues, usageStore};

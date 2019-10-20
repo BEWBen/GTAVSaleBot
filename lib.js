@@ -1,30 +1,31 @@
 const arrayMove = require('array-move');
 
-let queues = require('./state');
+const state = require('./state');
 
 const handleError = (msg, error) => {
     msg.reply(`A general error occured when processing the message \`${msg}\`\n${error}`);
+    throw error;
     return false;
 };
 
 const listQueues = () => {
-    if (queues.length === 0) {
+    if (state.queues.length === 0) {
         return 'There are no sale queues set up';
     }
-    return '\n' + queues.map((queue) => queue.renderList()).join('\n');
+    return '\n' + state.queues.map((queue) => queue.renderList()).join('\n');
 };
 
 const getQueue = (queue_name) => {
-    let queue = queues.find(({ name }) => name.toLowerCase() == queue_name.toLowerCase());
+    let queue = state.queues.find(({ name }) => name.toLowerCase() == queue_name.toLowerCase());
     if (!queue) {
         queue = new Queue(queue_name);
-        queues.push(queue);
+        state.queues.push(queue);
     }
     return queue;
 };
 
 const cleanQueues = () => {
-    queues = queues.filter((queue) => queue.length() > 0);
+    state.queues = state.queues.filter((queue) => queue.length() > 0);
 };
 
 class Queue {
@@ -39,6 +40,10 @@ class Queue {
         return `\nQueue \`${this.name}\`:\`\`\`${names}\`\`\``;
     }
 
+    has(name) {
+        return this.list.indexOf(name) >= 0;
+    }
+
     length() {
         return this.list.length;
     }
@@ -47,17 +52,16 @@ class Queue {
         return this.list.push(name);
     }
 
+    del(name) {
+        this.list = this.list.filter((n) => n !== name);
+    }
+
     shift() {
         return this.list.shift();
     }
 
-    jump(name) {
-        const pos  = this.list.indexOf(name);
-        if (pos <= 0) {
-            return false;
-        }
-        this.list = arrayMove(this.list, pos, 0);
-        return true;
+    move(posFrom, posTo) {
+        this.list = arrayMove(this.list, posFrom, posTo);
     }
 };
 
