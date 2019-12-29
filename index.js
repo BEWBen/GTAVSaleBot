@@ -7,7 +7,7 @@ const lib = require('./lib');
 const state = require('./state');
 const command_definitions = require('./commands');
 
-const { BOT_TOKEN, GUILD_ID, PREFIX } = process.env;
+const { BOT_TOKEN, GUILD_ID, PREFIX, LOG_MSGS } = process.env;
 
 // create command handlers and assign them to each invoke phrase
 commands = new Discord.Collection();
@@ -52,6 +52,14 @@ client.on('message', (msg) => {
         // remove empty queues
         lib.cleanQueues();
 
+        if (LOG_MSGS) {
+            // dont log msgs from the bot itself
+            if (client.user.id != msg.author.id) {
+                const logEntry = JSON.stringify(createLogEntry(msg));
+                console.log(`MSG: ${logEntry}`);
+            }
+        }
+
         // parse the message, ignore non-commands
         const parsed = parser.parse(msg, PREFIX, {
             allowBots: false,
@@ -79,3 +87,16 @@ client.on('message', (msg) => {
 });
 
 client.login(BOT_TOKEN);
+
+
+function createLogEntry(msg) {
+    let {author, channel, content, createdAt, guild, member, mentions} = msg;
+    // const mentions = TODO
+    return {
+        guild: {id: guild.id, name: guild.name},
+        channel: {id: channel.id, name: channel.name, type: channel.type},
+        user: {id: author.id, tag: author.tag, username: author.username, nickname: member.nickname},
+        msg: {type: msg.type, createdAt, content},
+        time: new Date(),
+    }
+}
