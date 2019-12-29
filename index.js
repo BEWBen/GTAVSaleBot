@@ -17,21 +17,7 @@ command_definitions.forEach(cmdDef => {
     const usageArgsLong = cmdDef.arguments.map((argDef) => `\`${argDef.name}\` - ${argDef.help}`).join('\n');
     const usage = cmdDef.invokes.map((inv) => `\`$${inv} ${usageArgsShort}\``).join('\n') + `\nArguments:\n${usageArgsLong}`;
     cmdDef._handle = (cmd) => {
-        const args = {};
-        for (let i=0; i<cmdDef.arguments.length; i++) {
-            const argDef = cmdDef.arguments[i];
-            if (typeof cmd.arguments[i] === 'undefined') {
-                if (argDef.required === true) {
-                    cmd.message.reply(`Not enough arguments. Usage:\n${usage}`);
-                    return;
-                } else {
-                    args[argDef.name] = (typeof argDef.default === 'function') ? argDef.default(cmd) : argDef.default;
-                }
-            } else {
-                args[argDef.name] = cmd.arguments[i];
-            }
-        }
-        cmdDef.handler(cmd, args);
+        cmdDef.handler(cmd, getCmdArgs(cmd, cmdDef));
     };
     cmdDef.invokes.forEach((invoke) => {
         commands.set(invoke.toLowerCase(), cmdDef);
@@ -89,9 +75,27 @@ client.on('message', (msg) => {
 client.login(BOT_TOKEN);
 
 
+function getCmdArgs(cmd, cmdDef) {
+    const args = {};
+    for (let i=0; i<cmdDef.arguments.length; i++) {
+        const argDef = cmdDef.arguments[i];
+        if (typeof cmd.arguments[i] === 'undefined') {
+            if (argDef.required === true) {
+                cmd.message.reply(`Not enough arguments. Usage:\n${usage}`);
+                return;
+            } else {
+                args[argDef.name] = (typeof argDef.default === 'function') ? argDef.default(cmd) : argDef.default;
+            }
+        } else {
+            args[argDef.name] = cmd.arguments[i];
+        }
+    }
+    return args;
+}
+
+
 function createLogEntry(msg) {
-    let {author, channel, content, createdAt, guild, member, mentions} = msg;
-    // const mentions = TODO
+    const {author, channel, content, createdAt, guild, member, mentions} = msg;
     return {
         guild: {id: guild.id, name: guild.name},
         channel: {id: channel.id, name: channel.name, type: channel.type},
