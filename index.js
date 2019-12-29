@@ -7,7 +7,7 @@ const lib = require('./lib');
 const state = require('./state');
 const command_definitions = require('./commands');
 
-const { BOT_TOKEN, GUILD_ID, PREFIX } = process.env;
+const { BOT_TOKEN, GUILD_ID, PREFIX, LOG_MSGS } = process.env;
 
 // create command handlers and assign them to each invoke phrase
 commands = new Discord.Collection();
@@ -17,21 +17,7 @@ command_definitions.forEach(cmdDef => {
     const usageArgsLong = cmdDef.arguments.map((argDef) => `\`${argDef.name}\` - ${argDef.help}`).join('\n');
     const usage = cmdDef.invokes.map((inv) => `\`$${inv} ${usageArgsShort}\``).join('\n') + `\nArguments:\n${usageArgsLong}`;
     cmdDef._handle = (cmd) => {
-        const args = {};
-        for (let i=0; i<cmdDef.arguments.length; i++) {
-            const argDef = cmdDef.arguments[i];
-            if (typeof cmd.arguments[i] === 'undefined') {
-                if (argDef.required === true) {
-                    cmd.message.reply(`Not enough arguments. Usage:\n${usage}`);
-                    return;
-                } else {
-                    args[argDef.name] = (typeof argDef.default === 'function') ? argDef.default(cmd) : argDef.default;
-                }
-            } else {
-                args[argDef.name] = cmd.arguments[i];
-            }
-        }
-        cmdDef.handler(cmd, args);
+        cmdDef.handler(cmd, getCmdArgs(cmd, cmdDef));
     };
     cmdDef.invokes.forEach((invoke) => {
         commands.set(invoke.toLowerCase(), cmdDef);
@@ -51,6 +37,14 @@ client.on('message', (msg) => {
     try {
         // remove empty queues
         lib.cleanQueues();
+
+        if (LOG_MSGS) {
+            // dont log msgs from the bot itself
+            if (client.user.id != msg.author.id) {
+                const logEntry = JSON.stringify(createLogEntry(msg));
+                console.log(`MSG: ${logEntry}`);
+            }
+        }
 
         // parse the message, ignore non-commands
         const parsed = parser.parse(msg, PREFIX, {
@@ -79,3 +73,34 @@ client.on('message', (msg) => {
 });
 
 client.login(BOT_TOKEN);
+
+
+function getCmdArgs(cmd, cmdDef) {
+    const args = {};
+    for (let i=0; i<cmdDef.arguments.length; i++) {
+        const argDef = cmdDef.arguments[i];
+        if (typeof cmd.arguments[i] === 'undefined') {
+            if (argDef.required === true) {
+                cmd.message.reply(`Not enough arguments. Usage:\n${usage}`);
+                return;
+            } else {
+                args[argDef.name] = (typeof argDef.default === 'function') ? argDef.default(cmd) : argDef.default;
+            }
+        } else {
+            args[argDef.name] = cmd.arguments[i];
+        }
+    }
+    return args;
+}
+
+
+function createLogEntry(msg) {
+    const {author, channel, content, createdAt, guild, member, mentions} = msg;
+    return {
+        guild: {id: guild.id, name: guild.name},
+        channel: {id: channel.id, name: channel.name, type: channel.type},
+        user: {id: author.id, tag: author.tag, username: author.username, nickname: member.nickname},
+        msg: {type: msg.type, createdAt, content},
+        time: new Date(),
+    }
+}

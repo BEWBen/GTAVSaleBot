@@ -24,7 +24,6 @@ $m mc 5                   Move the name at fifth position to the top of the queu
 
 Written by Dreen <@dreen#1006> for BEWB crew!
 \`\`\``;
-const renderName = (name, cmd) => name === cmd.message.author.username ? 'you' : `\`${name}\``;
 
 /**
  * Command definition objects:
@@ -38,7 +37,9 @@ const renderName = (name, cmd) => name === cmd.message.author.username ? 'you' :
  * default - optional function (receives the parsed command) or a constant value
  * help - help text displayed with $help <command> or if wrongly used
  **/
+// TODO if you @ someone, it takes their ID, should get nickname somehow
 const getUsername = (cmd) => cmd.message.member.nickname || cmd.message.member.displayName;
+const renderName = (name, cmd) => name === cmd.message.member.displayName ? 'you' : `\`${name}\``;
 module.exports = [{
     // displaying help
     name: 'help',
@@ -63,17 +64,29 @@ module.exports = [{
     invokes: ['add', 'a'],
     arguments: [
         {name: 'queue_name', required: true, help: 'Queue name - required'},
-        {name: 'user_name', help: 'User name - optional (defaults to username)', default: getUsername},
+        {name: 'user_name', help: 'User name - optional (defaults to your name)', default: getUsername},
     ],
     handler: (cmd, args) => {
         queue = lib.getQueue(args.queue_name);
         if (!queue) return;
-        if (queue.has(args.user_name.toLowerCase())) {
-            cmd.message.reply(`Name \`${args.user_name}\` is already present in the queue`);
+
+        let user_name = args.user_name;
+        // if the username is a mention, convert that to member nickname
+        // we are assuming a mere presence of exacly one mention means that its used for user_name
+        // its possible this may have unforseen problems and will need a lot more checks
+        if (cmd.message.mentions.members.size === 1 || cmd.message.mentions.users.size === 1) {
+            user_name = cmd.message.mentions.members.first().nickname;
+            if (!user_name) {
+                user_name = cmd.message.mentions.users.first().username;
+            }
+        }
+
+        if (queue.has(user_name.toLowerCase())) {
+            cmd.message.reply(`Name \`${user_name}\` is already present in the queue`);
             return;
         }
-        const pos = queue.add(args.user_name);
-        cmd.message.reply(`I added ${renderName(args.user_name, cmd)} to the bottom of \`${queue.name}\` queue, at position \`${pos}\``);
+        const pos = queue.add(user_name);
+        cmd.message.reply(`I added ${renderName(user_name, cmd)} to the bottom of \`${queue.name}\` queue, at position \`${pos}\``);
     }
 }, {
     // removing names from top of the list
@@ -81,8 +94,8 @@ module.exports = [{
     invokes: ['delTop', 'dt'],
     arguments: [{name: 'queue_name', required: true, help: 'Queue name - required'}],
     handler: (cmd, args) => {
-        const queue = lib.getQueue(args.queue_name);
-        if (queue.length() === 0) {
+        const queue = lib.findQueue(args.queue_name);
+        if (!queue) {
             cmd.message.reply(`Queue \`${args.queue_name}\` does not exist`);
             return;
         }
@@ -116,13 +129,13 @@ module.exports = [{
     handler: (cmd, args) => {
         args.posFrom = parseInt(args.posFrom);
         args.posTo = parseInt(args.posTo);
-        const queue = lib.getQueue(args.queue_name);
-        if (queue.length() === 0) {
+        const queue = lib.findQueue(args.queue_name);
+        if (!queue) {
             cmd.message.reply(`Queue \`${args.queue_name}\` does not exist`);
             return;
         } else if (args.posFrom === args.posTo || args.posFrom < 1 || args.posTo < 1 ||
-            args.posFrom > queue.length() || args.posTo > queue.length()) {
-            cmd.message.reply('Invalid positions for move, make sure to inspect the queue with `$list`');
+                args.posFrom > queue.length() || args.posTo > queue.length()) {
+            cmd.message.reply('Invalid positions for move, make sure to inspect the queue with `$list`. See also: `$help move`');
             return;
         }
         queue.move(args.posFrom - 1, args.posTo - 1);
