@@ -24,7 +24,6 @@ $m mc 5                   Move the name at fifth position to the top of the queu
 
 Written by Dreen <@dreen#1006> for BEWB crew!
 \`\`\``;
-const renderName = (name, cmd) => name === cmd.message.author.username ? 'you' : `\`${name}\``;
 
 /**
  * Command definition objects:
@@ -38,7 +37,9 @@ const renderName = (name, cmd) => name === cmd.message.author.username ? 'you' :
  * default - optional function (receives the parsed command) or a constant value
  * help - help text displayed with $help <command> or if wrongly used
  **/
+// TODO if you @ someone, it takes their ID, should get nickname somehow
 const getUsername = (cmd) => cmd.message.member.nickname || cmd.message.member.displayName;
+const renderName = (name, cmd) => name === cmd.message.author.username ? 'you' : `\`${name}\``;
 module.exports = [{
     // displaying help
     name: 'help',
@@ -63,7 +64,7 @@ module.exports = [{
     invokes: ['add', 'a'],
     arguments: [
         {name: 'queue_name', required: true, help: 'Queue name - required'},
-        {name: 'user_name', help: 'User name - optional (defaults to username)', default: getUsername},
+        {name: 'user_name', help: 'User name - optional (defaults to your name)', default: getUsername},
     ],
     handler: (cmd, args) => {
         queue = lib.getQueue(args.queue_name);
@@ -82,6 +83,7 @@ module.exports = [{
     arguments: [{name: 'queue_name', required: true, help: 'Queue name - required'}],
     handler: (cmd, args) => {
         const queue = lib.getQueue(args.queue_name);
+        // TODO: write findQueue() to not have to make this empty queue
         if (queue.length() === 0) {
             cmd.message.reply(`Queue \`${args.queue_name}\` does not exist`);
             return;
@@ -117,11 +119,12 @@ module.exports = [{
         args.posFrom = parseInt(args.posFrom);
         args.posTo = parseInt(args.posTo);
         const queue = lib.getQueue(args.queue_name);
+        // TODO: write findQueue() to not have to make this empty queue
         if (queue.length() === 0) {
             cmd.message.reply(`Queue \`${args.queue_name}\` does not exist`);
             return;
         } else if (args.posFrom === args.posTo || args.posFrom < 1 || args.posTo < 1 ||
-            args.posFrom > queue.length() || args.posTo > queue.length()) {
+                args.posFrom > queue.length() || args.posTo > queue.length()) {
             cmd.message.reply('Invalid positions for move, make sure to inspect the queue with `$list`');
             return;
         }
