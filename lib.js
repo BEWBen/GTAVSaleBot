@@ -15,8 +15,12 @@ const listQueues = () => {
     return '\n' + state.queues.map((queue) => queue.renderList()).join('\n');
 };
 
+const findQueue = (queue_name) => {
+    return state.queues.find(({ name }) => name.toLowerCase() == queue_name.toLowerCase());
+}
+
 const getQueue = (queue_name) => {
-    let queue = state.queues.find(({ name }) => name.toLowerCase() == queue_name.toLowerCase());
+    let queue = findQueue(queue_name);
     if (!queue) {
         queue = new Queue(queue_name);
         state.queues.push(queue);

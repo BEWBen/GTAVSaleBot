@@ -82,9 +82,8 @@ module.exports = [{
     invokes: ['delTop', 'dt'],
     arguments: [{name: 'queue_name', required: true, help: 'Queue name - required'}],
     handler: (cmd, args) => {
-        const queue = lib.getQueue(args.queue_name);
-        // TODO: write findQueue() to not have to make this empty queue
-        if (queue.length() === 0) {
+        const queue = lib.findQueue(args.queue_name);
+        if (!queue) {
             cmd.message.reply(`Queue \`${args.queue_name}\` does not exist`);
             return;
         }
@@ -118,9 +117,8 @@ module.exports = [{
     handler: (cmd, args) => {
         args.posFrom = parseInt(args.posFrom);
         args.posTo = parseInt(args.posTo);
-        const queue = lib.getQueue(args.queue_name);
-        // TODO: write findQueue() to not have to make this empty queue
-        if (queue.length() === 0) {
+        const queue = lib.findQueue(args.queue_name);
+        if (!queue) {
             cmd.message.reply(`Queue \`${args.queue_name}\` does not exist`);
             return;
         } else if (args.posFrom === args.posTo || args.posFrom < 1 || args.posTo < 1 ||
