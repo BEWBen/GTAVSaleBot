@@ -70,5 +70,5 @@ class Queue {
 };
 
 module.exports = {
-    listQueues, getQueue, handleError, cleanQueues
+    listQueues, getQueue, handleError, cleanQueues, findQueue
 };
