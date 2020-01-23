@@ -17,7 +17,12 @@ command_definitions.forEach(cmdDef => {
     const usageArgsLong = cmdDef.arguments.map((argDef) => `\`${argDef.name}\` - ${argDef.help}`).join('\n');
     const usage = cmdDef.invokes.map((inv) => `\`$${inv} ${usageArgsShort}\``).join('\n') + `\nArguments:\n${usageArgsLong}`;
     cmdDef._handle = (cmd) => {
-        cmdDef.handler(cmd, getCmdArgs(cmd, cmdDef));
+        const args = getCmdArgs(cmd, cmdDef);
+        if (!args) return;
+        // if (LOG_MSGS) {
+        //     console.log(`Handling ${cmdDef.name}(${Object.keys(args).map((argKey) => `${argKey}=${args[argKey]}`).join(', ')})`);
+        // }
+        cmdDef.handler(cmd, args);
     };
     cmdDef.invokes.forEach((invoke) => {
         commands.set(invoke.toLowerCase(), cmdDef);
@@ -81,6 +86,7 @@ function getCmdArgs(cmd, cmdDef) {
         const argDef = cmdDef.arguments[i];
         if (typeof cmd.arguments[i] === 'undefined') {
             if (argDef.required === true) {
+                const usage = state.usageStore[cmdDef.invokes[0].toLowerCase()];
                 cmd.message.reply(`Not enough arguments. Usage:\n${usage}`);
                 return;
             } else {
